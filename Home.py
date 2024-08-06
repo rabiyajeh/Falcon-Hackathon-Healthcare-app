@@ -25,8 +25,7 @@ API_URL = "https://api.ai71.ai/v1/chat/completions"
 
 # Load the pre-trained model for lung disease analysis
 def load_chexnet_model():
-    model = models.resnet50()
-    model.load_state_dict(torch.load('model.pth'))
+    model = models.resnet50(pretrained=True)
     model.eval()
     return model
 
@@ -43,7 +42,7 @@ def analyze_image(image):
     model = load_chexnet_model()
     img = Image.open(BytesIO(image.read()))
     img_tensor = preprocess_image(img)
-
+    
     try:
         with torch.no_grad():
             outputs = model(img_tensor)
@@ -69,7 +68,7 @@ def analyze_image(image):
             "severity": "N/A",
             "results": {}
         }
-
+        
 # Function to get response from the Falcon 180B model
 def get_response(prompt):
     headers = {

@@ -26,7 +26,7 @@ API_URL = "https://api.ai71.ai/v1/chat/completions"
 # Load the pre-trained model for lung disease analysis
 def load_chexnet_model():
     model = models.resnet50()
-    model.load_state_dict(torch.load('resnet50-19c8e357.pth'))
+    model.load_state_dict(torch.load('model.pth'))
     model.eval()
     return model
 

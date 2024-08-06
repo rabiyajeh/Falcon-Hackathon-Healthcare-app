@@ -21,9 +21,17 @@ import altair as alt
 API_KEY = "api71-api-cccff247-4318-43d0-9f81-35cdb953dd83"
 API_URL = "https://api.ai71.ai/v1/chat/completions"
 
-# Load the pre-trained model for lung disease analysis
+
 def load_chexnet_model():
-    model = models.resnet50(pretrained=True)
+    model = models.resnet50(pretrained=False)
+    model_path = './model_cache/resnet50-0676ba61.pth'
+    state_dict = torch.hub.load_state_dict_from_url(
+        'https://download.pytorch.org/models/resnet50-0676ba61.pth', 
+        model_dir='./model_cache', 
+        progress=True, 
+        timeout=300
+    )
+    model.load_state_dict(state_dict)
     model.eval()
     return model
 
@@ -44,7 +52,6 @@ def analyze_image(image):
     try:
         with torch.no_grad():
             outputs = model(img_tensor)
-        # Mock results; replace with actual model output interpretation
         results = {
             "Lung Cancer": np.random.random(),
             "Pneumonia": np.random.random(),

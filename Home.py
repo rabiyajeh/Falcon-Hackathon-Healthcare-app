@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -23,10 +24,29 @@ API_URL = "https://api.ai71.ai/v1/chat/completions"
 
 
 # Load the pre-trained model for lung disease analysis
+@st.cache_resource
 def load_chexnet_model():
-    model = models.resnet50(pretrained=True)
+    model_path = 'resnet50-19c8e357.pth'
+    if not os.path.exists(model_path):
+        download_model(model_path)
+    
+    model = models.resnet50()
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
+
+def download_model(model_path, max_retries=3):
+    url = 'https://download.pytorch.org/models/resnet50-19c8e357.pth'
+    for attempt in range(max_retries):
+        try:
+            torch.hub.download_url_to_file(url, model_path)
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"Download failed, retrying... ({attempt+1}/{max_retries})")
+            else:
+                print(f"Download failed after {max_retries} attempts.")
+                raise e
 
 def preprocess_image(image):
     preprocess = transforms.Compose([
@@ -67,7 +87,6 @@ def analyze_image(image):
             "severity": "N/A",
             "results": {}
         }
-
 # Function to get response from the Falcon 180B model
 def get_response(prompt):
     headers = {
